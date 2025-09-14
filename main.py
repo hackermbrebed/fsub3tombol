@@ -47,7 +47,7 @@ def get_fsub_keyboard(video_id):
         for i, ch in enumerate(CHANNELS)
     ]
     buttons.append(
-        [InlineKeyboardButton("✅ Coba Lagi", callback_data=f"retry:{video_id}")]
+        [InlineKeyboardButton("🔄 Coba Lagi", callback_data=f"retry:{video_id}")]
     )
     return InlineKeyboardMarkup(buttons)
 
@@ -58,20 +58,20 @@ async def check_fsub(client, user_id):
             member = await client.get_chat_member(ch["id"], user_id)
             print(f"[DEBUG] User {user_id} di {ch['id']} → {member.status}")
             if member.status in ["kicked", "left"]:
-                return False, f"❌ Kamu belum join channel {ch['link']}"
+                return False, f"🖕🏻 Lu belum join channel nyet! {ch['link']}"
         except Exception as e:
             print(f"[DEBUG] ERROR cek channel {ch['id']} → {e}")
-            return False, f"⚠️ Bot perlu jadi admin di {ch['link']}"
+            return False, f"⚠️ Bot perlu jadi admin dulu di channel ini nyet {ch['link']}"
     return True, None
 
 # Admin add video
 @app.on_message(filters.command("addvideo") & filters.reply)
 async def add_video(client, message):
     if message.from_user.id != ADMIN_ID:
-        return await message.reply("❌ Kamu bukan admin.")
+        return await message.reply("🖕🏻 Goblog lu bukan admin!")
 
     if not message.reply_to_message.video:
-        return await message.reply("⚠️ Reply ke video untuk menambahkan.")
+        return await message.reply("🖕🏻 Goblog reply videonya nyet!")
 
     file_id = message.reply_to_message.video.file_id
     video_id = str(uuid.uuid4())[:8]
@@ -82,7 +82,7 @@ async def add_video(client, message):
     deep_link = f"https://t.me/{BOT_USERNAME}?start={video_id}"
 
     await message.reply(
-        f"✅ Video disimpan!\nGunakan link:\n{deep_link}",
+        f"✅ Video disimpan jink!\nNih linknya:\n{deep_link}",
         quote=True,
         disable_web_page_preview=True
     )
@@ -92,25 +92,25 @@ async def add_video(client, message):
 async def start_cmd(client, message):
     args = message.text.split()
     if len(args) == 1:
-        return await message.reply("👋 Halo! Kirim link unik dari admin untuk menonton video.")
+        return await message.reply("👋 Halo nyet! Gunakan link yang dikirim admin untuk nonton videonya.")
 
     video_id = args[1]
     if video_id not in VIDEOS:
-        return await message.reply("⚠️ Video tidak ditemukan.")
+        return await message.reply("⚠️ Videonya ga ada nyet!")
 
     user_id = message.from_user.id
     ok, reason = await check_fsub(client, user_id)
 
     if not ok:
         await message.reply(
-            reason or "❌ Kamu belum join semua channel.",
+            reason or "🖕🏻 Join channelnya dulu nyet!",
             reply_markup=get_fsub_keyboard(video_id)
         )
     else:
         await client.send_video(
             user_id,
             VIDEOS[video_id],
-            caption=f"🎥 Video ID: {video_id}"
+            caption=f"🎥 Nih videonya, jangan lupa ngocok ya."
         )
 
 # Callback coba lagi
@@ -120,21 +120,21 @@ async def retry_fsub(client, callback_query):
     video_id = callback_query.matches[0].group(1)
 
     if video_id not in VIDEOS:
-        return await client.send_message(user_id, "⚠️ Video tidak ditemukan.")
+        return await client.send_message(user_id, "⚠️ Videonya ga ada nyet!")
 
     ok, reason = await check_fsub(client, user_id)
 
     if not ok:
         await client.send_message(
             user_id,
-            reason or "❌ Kamu belum join semua channel.",
+            reason or "🖕🏻 Join channelnya dulu nyet!",
             reply_markup=get_fsub_keyboard(video_id)
         )
     else:
         await client.send_video(
             user_id,
             VIDEOS[video_id],
-            caption=f"🎥 Video ID: {video_id}"
+            caption=f"🎥 Nih videonya, jangan lupa ngocok ya."
         )
 
     try:
@@ -146,10 +146,10 @@ async def retry_fsub(client, callback_query):
 @app.on_message(filters.command("listvideo"))
 async def list_video(client, message):
     if message.from_user.id != ADMIN_ID:
-        return await message.reply("❌ Kamu bukan admin.")
+        return await message.reply("🖕🏻 Goblog lu bukan admin!")
 
     if not VIDEOS:
-        return await message.reply("📂 Belum ada video tersimpan.")
+        return await message.reply("📂 Belum ada video tersimpan nyet.")
 
     text = "📋 Daftar Video:\n\n"
     for vid in VIDEOS:
